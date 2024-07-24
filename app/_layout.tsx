@@ -1,37 +1,45 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import { useFonts } from "expo-font";
+import {
+  Manrope_300Light,
+  Manrope_400Regular,
+  Manrope_600SemiBold,
+} from "@expo-google-fonts/manrope";
+import { AZUL } from "@/constants/Colors";
 
-import { useColorScheme } from '@/hooks/useColorScheme';
-
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+  const [loaded, error] = useFonts({
+    Manrope_300Light,
+    Manrope_400Regular,
+    Manrope_600SemiBold,
   });
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded || error) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, error]);
 
-  if (!loaded) {
+  if (!loaded && !error) {
     return null;
   }
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </ThemeProvider>
+    <Stack
+      screenOptions={{
+        headerTintColor: "white",
+        headerStyle: { backgroundColor: AZUL },
+      }}
+    >
+      <Stack.Screen options={{ headerShown: false }} name="index" />
+      <Stack.Screen name="cadastro" options={{ title: "Cadastrar produto" }} />
+      <Stack.Screen name="visualizar" options={{ title: "Pesquisar produto" }} />
+      <Stack.Screen name="atualizar" options={{ title: "Atualizar produto" }} />
+      <Stack.Screen name="remover" options={{ title: "Remover produto", presentation: "modal" }} />
+      <Stack.Screen name="ver" options={{ title: "Visualizar produto" }} />
+    </Stack>
   );
 }
