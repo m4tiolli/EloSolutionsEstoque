@@ -1,5 +1,6 @@
 import { ItemProps } from "@/app/visualizar";
 import { styles } from "@/styles/CardPesquisa.styles";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { View, Text, Image, TouchableOpacity } from "react-native";
 
@@ -8,14 +9,17 @@ interface CardPesquisaProps {
 }
 
 const CardPesquisa = ({ item }: CardPesquisaProps) => {
-  const query = `/ver?id=${item.ID}&nome=${item.nome}&descricao=${item.descricao}&patrimonio=${item.patrimonio}&imagem=${item.imagem}&numSerie=${item.numSerie}&nf=${item.nf}&localizacao=${item.localizacao}`;
+  const defineItems = async () => {
+    await AsyncStorage.setItem("imagem", item.imagem);
+    router.navigate(query);
+  };
+
+  // Use apenas identificadores e dados essenciais na URL
+  const query = `/ver?id=${item._id}&nome=${item.nome}&descricao=${item.descricao}&patrimonio=${item.patrimonio}&numSerie=${item.numSerie}&nf=${item.notafiscal}&localizacao=${item.localizacao}`;
 
   return (
-    <TouchableOpacity
-      style={styles.MainContainer}
-      onPress={() => router.navigate(query)}
-    >
-      <Image src={item.imagem} style={styles.Imagem} />
+    <TouchableOpacity style={styles.MainContainer} onPress={defineItems}>
+      <Image source={{ uri: item.imagem }} style={styles.Imagem} />
       <View style={styles.ViewDados}>
         <Text style={styles.Titulo} numberOfLines={1}>
           {item.nome}

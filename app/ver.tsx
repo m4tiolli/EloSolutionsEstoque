@@ -1,17 +1,32 @@
 import { AZUL, VERMELHO } from "@/constants/Colors";
 import { styles } from "@/styles/ver.styles";
-import { Link, router, useGlobalSearchParams } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  router,
+  useGlobalSearchParams,
+  useLocalSearchParams,
+} from "expo-router";
+import { useEffect, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function VerProduto() {
-  const { id, nome, descricao, patrimonio, imagem, numSerie, nf, localizacao } =
+  const { id, nome, descricao, patrimonio, numSerie, nf, localizacao } =
     useGlobalSearchParams();
-
-  const query = `?id=${id}&nome=${nome}&descricao=${descricao}&patrimonio=${patrimonio}&imagem=${imagem}&numSerie=${numSerie}&nf=${nf}&localizacao=${localizacao}`;
+  const [imagem, setImagem] = useState<string>();
+  useEffect(() => {
+    const getImagem = async () => {
+      const res = await AsyncStorage.getItem("imagem");
+      setImagem(res as string);
+    };
+    getImagem();
+  }, []);
 
   return (
     <View style={styles.MainContainer}>
-      <Image src={imagem as string} style={styles.Imagem} />
+      <Image
+        source={{ uri: imagem }} // Assumindo que a imagem está em base64
+        style={styles.Imagem}
+      />
 
       <Text style={styles.Nome}>{nome}</Text>
 
@@ -40,13 +55,21 @@ export default function VerProduto() {
       <View style={styles.ViewButtons}>
         <TouchableOpacity
           style={styles.Touchable}
-          onPress={() => router.navigate("/atualizar" + query)}
+          onPress={() =>
+            router.navigate(
+              `/atualizar?id=${id}&nome=${nome}&descricao=${descricao}&patrimonio=${patrimonio}&numSerie=${numSerie}&nf=${nf}&localizacao=${localizacao}`
+            )
+          }
         >
           <Text style={[styles.Text, { color: AZUL }]}>Editar</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.Touchable}
-          onPress={() => router.navigate("/remover" + query)}
+          onPress={() =>
+            router.navigate(
+              `/remover?id=${id}&nome=${nome}`
+            )
+          }
         >
           <Text style={[styles.Text, { color: VERMELHO }]}>Excluir</Text>
         </TouchableOpacity>

@@ -10,7 +10,7 @@ const Remover = () => {
 
   const handleDelete = () => {
     axios
-      .delete(process.env.URL_BASE + "/" + id)
+      .delete(process.env.EXPO_PUBLIC_URL_BASE + "/produtos/" + id)
       .then(() => alert("Item deletado com sucesso!"))
       .then(() => router.back())
       .catch((err) => console.error(err));

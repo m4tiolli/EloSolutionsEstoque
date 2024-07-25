@@ -9,13 +9,16 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { AZUL } from "@/constants/Colors";
-import { useGlobalSearchParams } from "expo-router";
+import { router, useGlobalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
-import * as ImagePicker from 'expo-image-picker'
+import * as ImagePicker from "expo-image-picker";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Atualizar() {
   const [disabled, setDisabled] = useState(true);
-  const { id, nome, descricao, patrimonio, imagem, numSerie, nf, localizacao } = useGlobalSearchParams();
+  const { id, nome, descricao, patrimonio, imagem, numSerie, nf, localizacao } =
+    useGlobalSearchParams();
   const [valNome, setValNome] = useState(nome as string);
   const [valDescricao, setValDescricao] = useState(descricao as string);
   const [valPatrimonio, setValPatrimonio] = useState(patrimonio as string);
@@ -65,18 +68,38 @@ export default function Atualizar() {
     }
   };
 
-  const handleUpdate = () => {
-    // Your update logic here
-    console.log({
-      id,
-      valNome,
-      valDescricao,
-      valPatrimonio,
-      valImagem,
-      valNumSerie,
-      valNf,
-      valLocalizacao,
-    });
+  useEffect(() => {
+    const getImagem = async () => {
+      const res = await AsyncStorage.getItem("imagem")
+      setValImagem(res as string)
+    }
+    getImagem()
+  }, [])
+
+  const handleUpdate = async () => {
+    const fileType = (valImagem as string).split(".").pop();
+
+    const data = {
+      nome: valNome,
+      descricao: valDescricao,
+      patrimonio: valPatrimonio,
+      numSerie: valNumSerie,
+      notafiscal: valNf,
+      localizacao: valLocalizacao,
+      imagem: fileType as string,
+    };
+
+    try {
+      await axios.put(
+        `${process.env.EXPO_PUBLIC_URL_BASE}/produtos/${id}`,
+        data
+      );
+      alert("Item atualizado com sucesso!");
+      router.back();
+    } catch (erro) {
+      console.error(erro);
+      alert("Erro ao atualizar o item");
+    }
   };
 
   useEffect(() => {
@@ -109,7 +132,7 @@ export default function Atualizar() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valNome}
-          onChangeText={(text) => setValNome(text)}
+          onChangeText={(text) => setValNome(text.toUpperCase())}
         />
       </View>
 
@@ -122,7 +145,7 @@ export default function Atualizar() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valDescricao}
-          onChangeText={(text) => setValDescricao(text)}
+          onChangeText={(text) => setValDescricao(text.toUpperCase())}
         />
       </View>
 
@@ -135,7 +158,7 @@ export default function Atualizar() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valPatrimonio}
-          onChangeText={(text) => setValPatrimonio(text)}
+          onChangeText={(text) => setValPatrimonio(text.toUpperCase())}
         />
       </View>
 
@@ -148,7 +171,7 @@ export default function Atualizar() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valNumSerie}
-          onChangeText={(text) => setValNumSerie(text)}
+          onChangeText={(text) => setValNumSerie(text.toUpperCase())}
         />
       </View>
 
@@ -161,7 +184,7 @@ export default function Atualizar() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valLocalizacao}
-          onChangeText={(text) => setValLocalizacao(text)}
+          onChangeText={(text) => setValLocalizacao(text.toUpperCase())}
         />
       </View>
 
@@ -174,7 +197,7 @@ export default function Atualizar() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valNf}
-          onChangeText={(text) => setValNf(text)}
+          onChangeText={(text) => setValNf(text.toUpperCase())}
         />
       </View>
 
@@ -218,7 +241,7 @@ export default function Atualizar() {
         disabled={disabled}
         onPress={handleUpdate}
       >
-        <Text style={styles.TextEnviar}>Cadastrar</Text>
+        <Text style={styles.TextEnviar}>Atualizar</Text>
       </TouchableOpacity>
     </ScrollView>
   );

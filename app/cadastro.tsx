@@ -74,7 +74,15 @@ export default function Cadastro() {
     } else {
       setDisabled(false);
     }
-  }, [valNome, valDescricao, valPatrimonio, valNumeroSerie, valLocalizacao, valNotaFiscal, image]);
+  }, [
+    valNome,
+    valDescricao,
+    valPatrimonio,
+    valNumeroSerie,
+    valLocalizacao,
+    valNotaFiscal,
+    image,
+  ]);
 
   const clearValues = () => {
     setValNome("");
@@ -87,33 +95,20 @@ export default function Cadastro() {
   };
 
   const handleCadastrar = async () => {
-    const formData = new FormData();
-    formData.append("nome", valNome);
-    formData.append("descricao", valDescricao);
-    formData.append("patrimonio", valPatrimonio);
-    formData.append("numSerie", valNumeroSerie);
-    formData.append("notafiscal", valNotaFiscal);
-    formData.append("localizacao", valLocalizacao);
-  
-    if (image) {
-      const fileUri = image;
-      const fileType = fileUri.split('.').pop();
-  
-      const fileData = {
-        uri: fileUri,
-        name: `photo.${fileType}`,
-        type: `image/${fileType}`,
-      };
-  
-      formData.append('image', fileData); // Use fileData diretamente aqui
-    }
-  
+    const fileType = (image as string).split(".").pop();
+
+    const data = {
+      nome: valNome,
+      descricao: valDescricao,
+      patrimonio: valPatrimonio,
+      numSerie: valNumeroSerie,
+      notafiscal: valNotaFiscal,
+      localizacao: valLocalizacao,
+      imagem: (fileType as string),
+    };
+
     try {
-      await axios.post('http://localhost:3000/produtos', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await axios.post(`${process.env.EXPO_PUBLIC_URL_BASE}/produtos`, data);
       alert("Item cadastrado com sucesso!");
       clearValues();
     } catch (erro) {
@@ -121,6 +116,7 @@ export default function Cadastro() {
       alert("Erro ao cadastrar o item");
     }
   };
+
   return (
     <ScrollView
       style={{ width: "100%", paddingBottom: 10, backgroundColor: AZUL }}
@@ -135,7 +131,7 @@ export default function Cadastro() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valNome}
-          onChangeText={(text) => setValNome(text)}
+          onChangeText={(text) => setValNome(text.toUpperCase())}
         />
       </View>
 
@@ -148,7 +144,7 @@ export default function Cadastro() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valDescricao}
-          onChangeText={(text) => setValDescricao(text)}
+          onChangeText={(text) => setValDescricao(text.toUpperCase())}
         />
       </View>
 
@@ -161,7 +157,7 @@ export default function Cadastro() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valPatrimonio}
-          onChangeText={(text) => setValPatrimonio(text)}
+          onChangeText={(text) => setValPatrimonio(text.toUpperCase())}
         />
       </View>
 
@@ -174,7 +170,7 @@ export default function Cadastro() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valNumeroSerie}
-          onChangeText={(text) => setValNumeroSerie(text)}
+          onChangeText={(text) => setValNumeroSerie(text.toUpperCase())}
         />
       </View>
 
@@ -187,7 +183,7 @@ export default function Cadastro() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valLocalizacao}
-          onChangeText={(text) => setValLocalizacao(text)}
+          onChangeText={(text) => setValLocalizacao(text.toUpperCase())}
         />
       </View>
 
@@ -200,7 +196,7 @@ export default function Cadastro() {
           cursorColor={"white"}
           autoCapitalize={"characters"}
           value={valNotaFiscal}
-          onChangeText={(text) => setValNotaFiscal(text)}
+          onChangeText={(text) => setValNotaFiscal(text.toUpperCase())}
         />
       </View>
 

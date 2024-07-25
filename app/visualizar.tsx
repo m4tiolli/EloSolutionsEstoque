@@ -13,7 +13,7 @@ import {
 import axios from "axios";
 
 export interface ItemProps {
-  id: string;
+  _id: string;
   nome: string;
   localizacao: string;
   imagem: string;
@@ -35,7 +35,7 @@ export default function Visualizar() {
     setPesquisando(true);
     startTransition(() => {
       axios
-        .get("https://www.jsondataai.com/api/WUXAzSE")
+        .get(`${process.env.EXPO_PUBLIC_URL_BASE}/produtos/${pesquisa}`)
         .then((response) => {
           setItems(response.data);
           setHasPesquisa(true);
@@ -66,7 +66,7 @@ export default function Visualizar() {
           cursorColor={"white"}
           value={pesquisa}
           onChangeText={(search) => {
-            if (!pesquisando) setPesquisa(search);
+            if (!pesquisando) setPesquisa(search.toUpperCase());
           }}
         />
         <TouchableOpacity
@@ -89,7 +89,7 @@ export default function Visualizar() {
               style={{ width: "80%", marginTop: 30 }}
               data={items}
               renderItem={({ item }) => <CardPesquisa item={item} />}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item._id}
               ItemSeparatorComponent={Separator}
             />
           </>
