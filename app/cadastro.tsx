@@ -1,5 +1,6 @@
 import { styles } from "@/styles/cadastro.styles";
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   Text,
@@ -15,7 +16,8 @@ import axios from "axios";
 
 export default function Cadastro() {
   const [disabled, setDisabled] = useState(true);
-  const [image, setImage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState<ImagePicker.ImagePickerAsset>();
   const [valNome, setValNome] = useState("");
   const [valDescricao, setValDescricao] = useState("");
   const [valPatrimonio, setValPatrimonio] = useState("");
@@ -34,11 +36,12 @@ export default function Cadastro() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [5, 4],
-      quality: 1,
+      quality: 0.7,
+      base64: true,
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImage(result.assets[0]);
     }
   };
 
@@ -52,11 +55,12 @@ export default function Cadastro() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [5, 4],
-      quality: 1,
+      quality: 0.7,
+      base64: true,
     });
 
     if (!result.canceled) {
-      setImage(result.assets[0].uri);
+      setImage(result.assets[0]);
     }
   };
 
@@ -91,11 +95,13 @@ export default function Cadastro() {
     setValNumeroSerie("");
     setValLocalizacao("");
     setValNotaFiscal("");
-    setImage(null);
+    setImage(undefined);
   };
 
   const handleCadastrar = async () => {
-    const fileType = (image as string).split(".").pop();
+    const fileType = (image?.uri as string).split(".").pop();
+    setDisabled(true);
+    setLoading(true);
 
     const data = {
       nome: valNome,
@@ -104,11 +110,15 @@ export default function Cadastro() {
       numSerie: valNumeroSerie,
       notafiscal: valNotaFiscal,
       localizacao: valLocalizacao,
-      imagem: (fileType as string),
+      imagem: image?.base64,
     };
 
     try {
-      await axios.post(`${process.env.EXPO_PUBLIC_URL_BASE}/produtos`, data);
+      await axios
+        .post(`${process.env.EXPO_PUBLIC_URL_BASE}/produtos`, data)
+        .then(() => {
+          setLoading(false);
+        });
       alert("Item cadastrado com sucesso!");
       clearValues();
     } catch (erro) {
@@ -225,10 +235,7 @@ export default function Cadastro() {
           <TouchableOpacity style={styles.EditTouchable} onPress={pickImage}>
             <Feather name="edit-3" style={styles.EditIcon} />
           </TouchableOpacity>
-          <Image
-            source={{ uri: image as string }}
-            style={styles.PreviewImage}
-          />
+          <Image source={{ uri: image.uri }} style={styles.PreviewImage} />
         </View>
       )}
 
@@ -240,7 +247,13 @@ export default function Cadastro() {
         disabled={disabled}
         onPress={handleCadastrar}
       >
-        <Text style={styles.TextEnviar}>Cadastrar</Text>
+        <Text style={styles.TextEnviar}>
+          {loading ? (
+            <ActivityIndicator size={"large"} color={"white"} />
+          ) : (
+            "Cadastrar"
+          )}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );

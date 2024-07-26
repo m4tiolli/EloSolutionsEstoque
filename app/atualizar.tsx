@@ -1,5 +1,6 @@
 import { styles } from "@/styles/cadastro.styles";
 import {
+  ActivityIndicator,
   Image,
   ScrollView,
   Text,
@@ -22,10 +23,12 @@ export default function Atualizar() {
   const [valNome, setValNome] = useState(nome as string);
   const [valDescricao, setValDescricao] = useState(descricao as string);
   const [valPatrimonio, setValPatrimonio] = useState(patrimonio as string);
-  const [valImagem, setValImagem] = useState(imagem as string);
+  const [valImagem, setValImagem] = useState<ImagePicker.ImagePickerAsset>();
+  const [imagemSalva, setImagemSalva] = useState<string>("");
   const [valNumSerie, setValNumSerie] = useState(numSerie as string);
   const [valNf, setValNf] = useState(nf as string);
   const [valLocalizacao, setValLocalizacao] = useState(localizacao as string);
+  const [loading, setLoading] = useState(false);
 
   const pickImage = async () => {
     const cameraRollStatus =
@@ -38,13 +41,13 @@ export default function Atualizar() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [5, 4],
-      quality: 1,
+      quality: 0.7,
+      base64: true,
     });
 
-    console.log(result);
-
     if (!result.canceled) {
-      setValImagem(result.assets[0].uri);
+      setImagemSalva("");
+      setValImagem(result.assets[0]);
     }
   };
 
@@ -58,27 +61,31 @@ export default function Atualizar() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [5, 4],
-      quality: 1,
+      quality: 0.7,
+      base64: true,
     });
 
     console.log(result);
 
     if (!result.canceled) {
-      setValImagem(result.assets[0].uri);
+      setImagemSalva("");
+      setValImagem(result.assets[0]);
     }
   };
 
   useEffect(() => {
     const getImagem = async () => {
-      const res = await AsyncStorage.getItem("imagem")
-      setValImagem(res as string)
-    }
-    getImagem()
-  }, [])
+      const res = await AsyncStorage.getItem("imagem");
+      if (res) {
+        setImagemSalva("data:image/jpeg;base64," + res);
+      }
+    };
+    getImagem();
+  }, []);
 
   const handleUpdate = async () => {
-    const fileType = (valImagem as string).split(".").pop();
-
+    setDisabled(true);
+    setLoading(true);
     const data = {
       nome: valNome,
       descricao: valDescricao,
@@ -86,14 +93,14 @@ export default function Atualizar() {
       numSerie: valNumSerie,
       notafiscal: valNf,
       localizacao: valLocalizacao,
-      imagem: fileType as string,
+      imagem: valImagem?.base64,
     };
+    await AsyncStorage.setItem("dadosNovos", JSON.stringify(data))
 
     try {
-      await axios.put(
-        `${process.env.EXPO_PUBLIC_URL_BASE}/produtos/${id}`,
-        data
-      );
+      await axios
+        .put(`${process.env.EXPO_PUBLIC_URL_BASE}/produtos/${id}`, data)
+        .then(() => setLoading(false));
       alert("Item atualizado com sucesso!");
       router.back();
     } catch (erro) {
@@ -110,13 +117,22 @@ export default function Atualizar() {
       valNumSerie.length < 1 ||
       valLocalizacao.length < 1 ||
       valNf.length < 1 ||
-      !valImagem
+      (!valImagem && !imagemSalva)
     ) {
       setDisabled(true);
     } else {
       setDisabled(false);
     }
-  });
+  }, [
+    valNome,
+    valDescricao,
+    valPatrimonio,
+    valNumSerie,
+    valLocalizacao,
+    valNf,
+    valImagem,
+    imagemSalva,
+  ]);
 
   return (
     <ScrollView
@@ -201,7 +217,7 @@ export default function Atualizar() {
         />
       </View>
 
-      {!valImagem && (
+      {!valImagem && !imagemSalva && (
         <View
           style={{
             flexDirection: "row",
@@ -221,13 +237,13 @@ export default function Atualizar() {
         </View>
       )}
 
-      {valImagem && (
+      {(valImagem || imagemSalva) && (
         <View style={styles.ViewImage}>
           <TouchableOpacity style={styles.EditTouchable} onPress={pickImage}>
             <Feather name="edit-3" style={styles.EditIcon} />
           </TouchableOpacity>
           <Image
-            source={{ uri: valImagem as string }}
+            source={{ uri: valImagem?.uri ?? imagemSalva }}
             style={styles.PreviewImage}
           />
         </View>
@@ -241,7 +257,13 @@ export default function Atualizar() {
         disabled={disabled}
         onPress={handleUpdate}
       >
-        <Text style={styles.TextEnviar}>Atualizar</Text>
+        <Text style={styles.TextEnviar}>
+          {loading ? (
+            <ActivityIndicator size={"large"} color={"white"} />
+          ) : (
+            "Atualizar"
+          )}
+        </Text>
       </TouchableOpacity>
     </ScrollView>
   );

@@ -19,7 +19,7 @@ const CardPesquisa = ({ item }: CardPesquisaProps) => {
 
   return (
     <TouchableOpacity style={styles.MainContainer} onPress={defineItems}>
-      <Image source={{ uri: item.imagem }} style={styles.Imagem} />
+      <Image source={{ uri: 'data:image/jpeg;base64,' + item.imagem }} style={styles.Imagem} />
       <View style={styles.ViewDados}>
         <Text style={styles.Titulo} numberOfLines={1}>
           {item.nome}

@@ -56,7 +56,7 @@ export default function Visualizar() {
   console.log(items);
 
   return (
-    <View style={styles.MainContainer}>
+    (<View style={styles.MainContainer}>
       <View style={styles.ViewSearch}>
         <Text style={styles.TextSearch}>Pesquisar por um produto</Text>
         <TextInput
@@ -76,12 +76,13 @@ export default function Visualizar() {
           <Feather style={styles.IconSearch} name="search" />
         </TouchableOpacity>
       </View>
-
       {hasPesquisa &&
         (isPending ? (
-          <ActivityIndicator />
-        ) : items.length > 0 ? (
-          <>
+          <ActivityIndicator color={'white'} size={'large'} />
+        ) : items.length <= 0 ? (
+          (<Empty />)
+        ) : (
+          (<>
             <Text style={styles.Text}>
               Mostrando resultados para "{pesquisa ?? ""}"
             </Text>
@@ -92,11 +93,9 @@ export default function Visualizar() {
               keyExtractor={(item) => item._id}
               ItemSeparatorComponent={Separator}
             />
-          </>
-        ) : (
-          <Empty />
+          </>)
         ))}
-    </View>
+    </View>)
   );
 }
 

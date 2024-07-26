@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function VerProduto() {
-  const { id, nome, descricao, patrimonio, numSerie, nf, localizacao } =
+  var { id, nome, descricao, patrimonio, numSerie, nf, localizacao } =
     useGlobalSearchParams();
   const [imagem, setImagem] = useState<string>();
   useEffect(() => {
@@ -21,10 +21,27 @@ export default function VerProduto() {
     getImagem();
   }, []);
 
+  useEffect(() => {
+    const getDadosNovos = async () => {
+      const res = await AsyncStorage.getItem("dadosNovos");
+      if (res) {
+        const r = JSON.parse(res as string);
+        nome = r.nome;
+        descricao = r.descricao;
+        setImagem(r.imagem);
+        patrimonio = r.patrimonio
+        numSerie = r.numSerie
+        nf = r.notafiscal
+        localizacao = r.localizacao
+      }
+    };
+    getDadosNovos()
+  });
+
   return (
     <View style={styles.MainContainer}>
       <Image
-        source={{ uri: imagem }} // Assumindo que a imagem está em base64
+        source={{ uri: "data:image/jpeg;base64," + imagem }} // Assumindo que a imagem está em base64
         style={styles.Imagem}
       />
 
@@ -65,11 +82,7 @@ export default function VerProduto() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.Touchable}
-          onPress={() =>
-            router.navigate(
-              `/remover?id=${id}&nome=${nome}`
-            )
-          }
+          onPress={() => router.navigate(`/remover?id=${id}&nome=${nome}`)}
         >
           <Text style={[styles.Text, { color: VERMELHO }]}>Excluir</Text>
         </TouchableOpacity>
